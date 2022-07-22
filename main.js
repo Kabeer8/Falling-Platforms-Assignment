@@ -1,64 +1,97 @@
-// Baby Names Data (Top 50 Boy/Girl 2022)
-// Baby Center (babycenter.com)
-// https://www.babycenter.com/baby-names/most-popular/top-baby-names#popularNameList
+let cnv = document.getElementById("my-canvas");
+let ctx = cnv.getContext("2d");
+cnv.height = 620;
+cnv.width = 450;
+let stop = false
+let player = (rectangles(225, 500, 10, 10, 0.3, "red"))
+let obstacles = [];
 
-// Variables for html elements
-let goBtn = document.getElementById("go-btn");
-let menuSelect = document.getElementById("menu-select");
-let container = document.getElementById("container");
-let nameCountSpan = document.getElementById("name-count");
+for(let i = 0; i < 15; i++){
 
-// Initialize Array of Character Objects from json file
-let babyData = [];
-fetch("baby-names-data.json")
-  .then((res) => res.json())
-  .then((data) => (babyData = data));
-
-// Event Listener on Go Button
-goBtn.addEventListener("click", goBtnClicked);
-
-// Process Go Button Click
-function goBtnClicked() {
-  // Get Menu Selection
-  let selection = menuSelect.value;
-
-  // Process Menu Selection
-  if (selection === "display-all") {
-    displayAll();
-  } else if (selection === "gender") {
-    searchGender();
-  } else if (selection === "rank") {
-    searchRank();
-  } else if (selection === "starting-letter") {
-    searchStartingLetter();
-  } else if (selection === "length") {
-    searchLength();
-  }
+    obstacles.push(rectangles(Math.floor((Math.random() * 400) + 0),
+    Math.floor((Math.random() * 400) + 0),
+    Math.floor((Math.random() * 150) + 50),
+    15,
+    Math.floor((Math.random() * 3) + 1),
+    "white"));
 }
 
-// Display All Baby Names
-function displayAll() {
-  console.log("Display All");
-  // Confirm data load
-  console.log(babyData);
+(requestAnimationFrame)(draw);
+function draw(){
+    ctx.clearRect(0, 0, cnv.width, cnv.height);
+    for(let i = 0; i < 15; i++){
+        drawRect(obstacles[i]);
+        animate(obstacles[i])
+        if(obstacles[i].y >= 620){
+            obstacles[i].x = Math.floor((Math.random() * 400) + 0);
+            obstacles[i].y = 0;
+        }
+        for(let l = 0; l < obstacles[i].w; l++){
+            if(dist(player.x, player.y, (obstacles[i].x) + l, obstacles[i].y) <= 5){
+                stop = true;
+            }
+        }
+        if(stop == true){
+            player.s = obstacles[i].s +3;
+            animate(player);
+            stop = false;
+        }
+    }
+    if(stop == false){
+        player.y -= 2;
+    }
+    if(player. y >= 620){
+        alert("You lost, refresh to try again")
+    }
+    if(player. y <= 0){
+        alert("You won! refresh to play again")
+    }
+    if(player. x <= 0){
+        player.x = 0
+    }
+    if(player. x >= 440){
+        player.x = 440
+    }
+    drawRect(player);
+    requestAnimationFrame(draw);
 }
 
-// Display Names by Gender
-function searchGender() {
-  console.log("Search By Gender");
+function drawRect(rect){
+    x = rect.x;
+    y = rect.y;
+    w = rect.w;
+    h = rect.h;
+    ctx.fillStyle = rect.c
+    ctx.fillRect(x, y, w, h);
 }
 
-// Display Names within a Range of Ranks
-function searchRank() {
-  console.log("Search By Rank");
+function rectangles(initX, initY, initW, initH, initS, initC){
+    return{
+        x: initX,
+        y: initY,
+        w: initW,
+        h: initH,
+        s: initS,
+        c: initC
+    }
 }
 
-// Display Names with Starting Letter
-function searchStartingLetter() {
-  console.log("Search by Starting Letter");
+function animate(rect){
+    rect.y += rect.s
 }
 
-// Display Names with a Specific Length
-function searchLength() {
-  console.log("Search by Name Length");
+document.addEventListener("keydown", keydownHandler)
+
+function keydownHandler(event){
+
+    if(event.keyCode === 37){
+    player.x -= 30;
+    }
+    if(event.keyCode === 39){
+    player.x += 30;
+    }
+}
+
+function dist(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
 }
